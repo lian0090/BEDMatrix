@@ -26,21 +26,23 @@ BEDMatrix <- function (path, n = NULL, p = NULL) {
   }
   dir <- substr(path, 1, nchar(path) - 4)
   # Check if FAM file exists.
-  if (file.exists(paste0(dir, '.fam'))) {
-    fam <- readLines(paste0(dir, '.fam'))
+if (is.null(n)) {
+  if (file.exists(paste0(dir, ".fam"))) {
+    fam <- readLines(paste0(dir, ".fam"))
     # Determine n.
     n <- length(fam)
     # Determine rownames.
-    rownames <- sapply(strsplit(fam, delims), function (line) {
-      return(paste0(line[1], '_', line[2]))
+    rownames <- sapply(strsplit(fam, delims), function(line) {
+      return(paste0(line[1], "_", line[2]))
     })
   } else {
-    if (is.null(n)) {
-      stop('FAM file of same name not found. Provide number of individuals (n).')
-    }
-    rownames <- paste0('id_', 1:n)
+    stop("FAM file of same name not found. Provide number of individuals (n).")
   }
+}
+  n <- as.integer(n)
+  rownames <- paste0('id_', 1:n)
   # Check if BIM file exists.
+  if(is.null(p)){
   if (file.exists(paste0(dir, '.bim'))) {
     bim <- readLines(paste0(dir, '.bim'))
     # Determine p.
@@ -50,13 +52,12 @@ BEDMatrix <- function (path, n = NULL, p = NULL) {
       return(line[2])
     })
   } else {
-    if (is.null(p)) {
       stop('BIM file of same name not found. Provide number of markers (p).')
     }
-    colnames <- paste0('mrk_', 1:p)
-  }
-  n <- as.integer(n)
+  }  
   p <- as.integer(p)
+  colnames <- paste0('mrk_', 1:p)
+
   # Create Rcpp object
   rcpp_obj <- new(BEDMatrix_, path, n, p)
   # Wrap object in S3 class
